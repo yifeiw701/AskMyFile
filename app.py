@@ -5,13 +5,13 @@ from langchain_experimental.agents import create_csv_agent
 from langchain.llms import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Pinecone
+from langchain.vectorstores import Pinecone as PineconeStore
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 import os
-import pinecone
+from pinecone import Pinecone, ServerlessSpec
 from docx import Document
 import tempfile
 
@@ -73,9 +73,6 @@ def display_doc_chat():
                         raw_text += get_doc_text([uploaded_file])
 
                 text_chunks = get_text_chunks(raw_text)
-                PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
-                PINECONE_ENV = os.getenv('PINECONE_ENV')
-                pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
                 vectorstore = get_vectorstore(text_chunks)
                 st.session_state.conversation = get_conversation_chain(vectorstore)
 
@@ -108,7 +105,17 @@ def get_text_chunks(text):
 
 def get_vectorstore(text_chunks):
     embeddings = OpenAIEmbeddings()
-    vectorstore = Pinecone.from_texts(texts=text_chunks, embedding=embeddings, index_name='docs-chat1')
+    PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+    pc = Pinecone(api_key=PINECONE_API_KEY)
+    index_name = 'docs-chat1'
+    if index_name not in pc.list_indexes().names():
+        pc.create_index(
+            name=index_name,
+            dimension=1536, 
+            metric='cosine',  
+            spec=ServerlessSpec(cloud='gcp-starter', region='Iowa (us-central1)')
+        )
+    vectorstore = PineconeStore.from_texts(texts=text_chunks, embedding=embeddings, index_name='docs-chat1')
     return vectorstore
 
 def get_conversation_chain(vectorstore):
@@ -132,7 +139,7 @@ def handle_doc_userinput(user_question):
             "{{MSG}}", st.session_state.chat_history[i].content), unsafe_allow_html=True) 
         st.write(bot_template.replace(
             "{{MSG}}", st.session_state.chat_history[i+1].content), unsafe_allow_html=True) 
-        
+
 def handle_csv_userinput(user_question):
     response = st.session_state.csv_agent.run(user_question)
     st.session_state.csv_chat_history.insert(0, {'user': user_question, 'bot': response})
