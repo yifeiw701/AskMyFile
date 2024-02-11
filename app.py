@@ -108,7 +108,7 @@ def get_text_chunks(text):
 
 def get_vectorstore(text_chunks):
     embeddings = OpenAIEmbeddings()
-    vectorstore = Pinecone.from_texts(texts=text_chunks, embedding=embeddings, index_name='docs-chat')
+    vectorstore = Pinecone.from_texts(texts=text_chunks, embedding=embeddings, index_name='docs-chat1')
     return vectorstore
 
 def get_conversation_chain(vectorstore):
