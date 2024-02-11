@@ -5,3 +5,4 @@ streamlit
 openai
 pinecone-client
 docx2txt
+langchain_experimental
