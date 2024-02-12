@@ -8,3 +8,4 @@ docx2txt
 langchain_experimental
 python-docx
 langchain-community
+tiktoken
