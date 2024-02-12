@@ -1,6 +1,6 @@
 ## 💼 AskMyFile
 
-This is a user-friendly chatbot application, enabling efficient data analysis and information extraction from various file types, including CSV, PDF, and Word documents.See it [here](https://askmyfiles.streamlit.app/)
+This is a user-friendly chatbot application, enabling efficient data analysis and information extraction from various file types, including CSV, PDF, and Word documents. See it [here](https://askmyfiles.streamlit.app/)
 
 ## 🧰 Technologies I used
 
